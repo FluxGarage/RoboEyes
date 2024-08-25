@@ -52,6 +52,7 @@ Alternately displaces the eyes in the defined amplitude in pixels:
 ### Macro Animators
 Blinks both eyes randomly:
 - **setAutoblinker()** _(bool ON/OFF, int interval, int variation) -> turn on/off, set interval between each blink in full seconds, set range for additional random interval variation in full seconds_
+
 Repositions both eyes randomly:
 - **setIdleMode()** _(bool ON/OFF, int interval, int variation) -> turn on/off, set interval between each eye repositioning in full seconds, set range for additional random interval variation in full seconds_
 
