@@ -5,7 +5,7 @@ Draws smoothly animated robot eyes on OLED displays, using the Adafruit GFX libr
 Developing this library was the first step of a larger project: the creation of my own DIY robot from the design perspective. Check out the [FluxGarage Youtube Channel](https://www.youtube.com/@FluxGarage).
 
 
-## See What's Possible
+## Watch the First Demo on Youtube
 
 [![#1 - Smoothly Animated Robot Eyes on OLED Displays with the Robo Eyes Library](https://img.youtube.com/vi/ibSaDEkfUOI/0.jpg)](https://www.youtube.com/watch?v=ibSaDEkfUOI)
 
