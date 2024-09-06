@@ -7,7 +7,7 @@
 //  some pushbuttons, jumper wires and optionally a joystick module. Find the instructions here:
 //  http://www.instructables.com/member/FluxGarage/
 //  
-//  Published in August 2024 by Dennis Hoelscher, FluxGarage
+//  Published in September 2024 by Dennis Hoelscher, FluxGarage
 //  www.youtube.com/@FluxGarage
 //  www.fluxgarage.com
 //
