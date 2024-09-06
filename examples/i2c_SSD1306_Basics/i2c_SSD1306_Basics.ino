@@ -4,7 +4,7 @@
 //  Hardware: You'll need a breadboard, an arduino nano r3, an I2C oled display with 1306   
 //  or 1309 chip and some jumper wires.
 //  
-//  Published in August 2024 by Dennis Hoelscher, FluxGarage
+//  Published in September 2024 by Dennis Hoelscher, FluxGarage
 //  www.youtube.com/@FluxGarage
 //  www.fluxgarage.com
 //
