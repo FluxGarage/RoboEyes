@@ -3,9 +3,16 @@
 #######################################
 
 #######################################
-# Datatypes (KEYWORD1)
+# Datatypes / Branding / Keywords (KEYWORD1)
 #######################################
 RoboEyes	KEYWORD1
+FluxGarage	KEYWORD1
+OLED	KEYWORD1
+eyes	KEYWORD1
+robot	KEYWORD1
+animation	KEYWORD1
+mood	KEYWORD1
+expression	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
