@@ -13,9 +13,13 @@ Developing this library was the first step of a larger project: the creation of 
 
 ## Installation
 
-1. Navigate to [github.com/FluxGarage/RoboEyes](https://github.com/FluxGarage/RoboEyes).
-2. Choose "Code > Download Zip"
-3. In the Arduino IDE, navigate to "Sketch > Include Library > Add .ZIP Library" and select the downloaded file
+1. Open the Arduino IDE
+2. Go to **Sketch → Include Library → Manage Libraries…**
+3. Search for **"FluxGarage RoboEyes"**
+4. Click **Install**
+
+After installation, the example sketches can be found under  
+**File → Examples → FluxGarage RoboEyes**.
 
 
 ## Functions
@@ -66,4 +70,5 @@ Repositions both eyes randomly:
 - RoboEyes Micropython Edition by Youssef Tech: https://github.com/yousseftechdev/RoboEyes-Micropython
 - RoboEyes for TFT displays by Youssef Tech: https://github.com/yousseftechdev/RoboEyesTFT
 - MQTT control system by teletoby-swctv: https://github.com/teletoby-swctv/FluxGarage-RoboEyes-MQTT
+
 
