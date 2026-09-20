@@ -1,5 +1,5 @@
 /*
- * FluxGarage RoboEyes for OLED Displays V 1.1.1
+ * FluxGarage RoboEyes for OLED Displays V 1.2.0
  * Draws smoothly animated robot eyes on OLED displays, based on the Adafruit GFX 
  * library's graphics primitives, such as rounded rectangles and triangles.
  *   
@@ -36,6 +36,23 @@ uint8_t MAINCOLOR = 1; // drawings
 #define TIRED 1
 #define ANGRY 2
 #define HAPPY 3
+#define ALERT 4
+#define BORED 5
+#define DESPAIR 6
+#define DISORIENTED 7
+#define EXCITED 8
+#define FOCUSED 9
+#define FURIOUS 10
+#define SAD 11
+#define SCARED 12
+#define SLEEPY 13
+#define SURPRISED 14
+#define WORRIED 15
+#define ANNOYED 16
+#define CONFUSED 17
+#define CURIOUS 18
+#define PROUD 19
+#define RELAXED 20
 
 // For turning things on or off
 #define ON 1
@@ -53,7 +70,7 @@ uint8_t MAINCOLOR = 1; // drawings
 // for middle center set "DEFAULT"
 
 
-// Constructor: takes a reference to the active Adafruit display object (e.g., Adafruit_SSD1327)
+// Constructor: takes a reference to the active Adafruit display object (e.g., Adafruit .,mn  67SSD1327)
 // Eg: roboEyes<Adafruit_SSD1327> = eyes(display);
 template<typename AdafruitDisplay>
 class RoboEyes
@@ -77,6 +94,23 @@ unsigned long fpsTimer = 0; // for timing the frames per second
 bool tired = 0;
 bool angry = 0;
 bool happy = 0;
+bool alert = 0;
+bool bored = 0;
+bool despair = 0;
+bool disoriented = 0;
+bool excited = 0;
+bool focused = 0;
+bool furious = 0;
+bool sad = 0;
+bool scared = 0;
+bool sleepy = 0;
+bool surprised = 0;
+bool worried = 0;
+bool annoyed = 0;
+bool confusedMood = 0; // confused expression mood (not to be mixed up with the "confused" shake animation flag)
+bool curiousMood = 0; // curious expression mood (not to be mixed up with the "curious" gaze feature flag)
+bool proudMood = 0;
+bool relaxedMood = 0;
 bool curious = 0; // if true, draw the outer eye larger when looking left or right
 bool cyclops = 0; // if true, draw only one eye
 bool eyeL_open = 0; // left eye opened or closed?
@@ -140,10 +174,94 @@ byte eyelidsAngryHeightNext = eyelidsAngryHeight;
 byte eyelidsHappyBottomOffsetMax = (eyeLheightDefault/2)+3;
 byte eyelidsHappyBottomOffset = 0;
 byte eyelidsHappyBottomOffsetNext = 0;
+// Alert eyelids (raised)
+byte eyelidsAlertHeight = 0;
+byte eyelidsAlertHeightNext = 0;
+// Bored eyelids (droopy outer)
+byte eyelidsBoredHeight = 0;
+byte eyelidsBoredHeightNext = 0;
+// Despair eyelids (extreme sad)
+byte eyelidsDespairHeight = 0;
+byte eyelidsDespairHeightNext = 0;
+// Disoriented (asymmetric)
+byte eyelidsDisorientedHeightL = 0;
+byte eyelidsDisorientedHeightLNext = 0;
+byte eyelidsDisorientedHeightR = 0;
+byte eyelidsDisorientedHeightRNext = 0;
+// Excited (wide)
+byte eyelidsExcitedHeight = 0;
+byte eyelidsExcitedHeightNext = 0;
+// Focused (narrowed)
+byte eyelidsFocusedHeight = 0;
+byte eyelidsFocusedHeightNext = 0;
+// Furious (extreme angry)
+byte eyelidsFuriousHeight = 0;
+byte eyelidsFuriousHeightNext = 0;
+// Sad (droopy outer)
+byte eyelidsSadHeight = 0;
+byte eyelidsSadHeightNext = 0;
+// Scared (raised brows)
+byte eyelidsScaredHeight = 0;
+byte eyelidsScaredHeightNext = 0;
+// Sleepy (heavy lids)
+byte eyelidsSleepyHeight = 0;
+byte eyelidsSleepyHeightNext = 0;
+// Surprised (max height, round)
+byte eyelidsSurprisedHeight = 0;
+byte eyelidsSurprisedHeightNext = 0;
+// Worried (furrowed inner)
+byte eyelidsWorriedHeight = 0;
+byte eyelidsWorriedHeightNext = 0;
+// Annoyed (half-closed asymmetric)
+byte eyelidsAnnoyedHeight = 0;
+byte eyelidsAnnoyedHeightNext = 0;
+// Confused (asymmetric eyelid positions)
+byte eyelidsConfusedHeightL = 0;
+byte eyelidsConfusedHeightLNext = 0;
+byte eyelidsConfusedHeightR = 0;
+byte eyelidsConfusedHeightRNext = 0;
+// Curious (raised inner brows)
+byte eyelidsCuriousHeight = 0;
+byte eyelidsCuriousHeightNext = 0;
+// Proud bottom eyelids (narrowed lower lids)
+byte eyelidsProudBottomOffset = 0;
+byte eyelidsProudBottomOffsetNext = 0;
+// Relaxed top eyelids
+byte eyelidsRelaxedHeight = 0;
+byte eyelidsRelaxedHeightNext = 0;
 // Space between eyes
 int spaceBetweenDefault = 10;
 int spaceBetweenCurrent = spaceBetweenDefault;
 int spaceBetweenNext = 10;
+
+// Mood-specific geometry targets (computed once per mood change)
+int mood_eyeLheightTarget = eyeLheightDefault;
+int mood_eyeRheightTarget = eyeRheightDefault;
+int mood_eyeLwidthTarget = eyeLwidthDefault;
+int mood_eyeRwidthTarget = eyeRwidthDefault;
+byte mood_eyeLborderRadiusTarget = eyeLborderRadiusDefault;
+byte mood_eyeRborderRadiusTarget = eyeRborderRadiusDefault;
+int mood_eyeLyOffset = 0;
+int mood_eyeRyOffset = 0;
+int mood_spaceBetweenTarget = spaceBetweenDefault;
+bool mood_usesHeightOffset = false;
+bool mood_autoblinker = false;
+int mood_blinkInterval = 1;
+int mood_blinkVariation = 4;
+bool mood_hFlicker = false;
+byte mood_hFlickerAmplitude = 0;
+bool mood_vFlicker = false;
+byte mood_vFlickerAmplitude = 0;
+bool mood_sweat = false;
+unsigned long moodChangeTime = 0;
+unsigned char currentMood = DEFAULT;
+unsigned char previousMood = DEFAULT;
+bool moodInitialized = false;
+
+// Smoothing factors for fluid transitions
+float geometrySmoothing = 0.15f;  // slower = smoother
+float eyelidSmoothing = 0.2f;
+float positionSmoothing = 0.15f;
 
 
 //*********************************************************************************************
@@ -188,29 +306,15 @@ bool laughToggle = 1;
 bool sweat = 0;
 byte sweatBorderradius = 3;
 
-// Sweat drop 1
-int sweat1XPosInitial = 2;
-int sweat1XPos;
-float sweat1YPos = 2;
-int sweat1YPosMax;
-float sweat1Height = 2;
-float sweat1Width = 1;
-
-// Sweat drop 2
-int sweat2XPosInitial = 2;
-int sweat2XPos;
-float sweat2YPos = 2;
-int sweat2YPosMax;
-float sweat2Height = 2;
-float sweat2Width = 1;
-
-// Sweat drop 3
-int sweat3XPosInitial = 2;
-int sweat3XPos;
-float sweat3YPos = 2;
-int sweat3YPosMax;
-float sweat3Height = 2;
-float sweat3Width = 1;
+// Fluid sweat drop state (3 drops)
+struct SweatDrop {
+  int xPosInitial = 2;
+  float yPos = 2;
+  int yPosMax = 10;
+  float height = 2;
+  float width = 1;
+};
+SweatDrop sweat1, sweat2, sweat3;
 
 
 //*********************************************************************************************
@@ -288,26 +392,70 @@ void setMood(unsigned char mood)
     switch (mood)
     {
     case TIRED:
-      tired=1; 
-      angry=0; 
-      happy=0;
+      tired=1; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
       break;
     case ANGRY:
-      tired=0; 
-      angry=1; 
-      happy=0;
+      tired=0; angry=1; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
       break;
     case HAPPY:
-      tired=0; 
-      angry=0; 
-      happy=1;
+      tired=0; angry=0; happy=1; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case ALERT:
+      tired=0; angry=0; happy=0; alert=1; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case BORED:
+      tired=0; angry=0; happy=0; alert=0; bored=1; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case DESPAIR:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=1; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case DISORIENTED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=1; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case EXCITED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=1; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case FOCUSED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=1; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case FURIOUS:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=1; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case SAD:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=1; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case SCARED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=1; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case SLEEPY:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=1; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case SURPRISED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=1; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case WORRIED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=1; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case ANNOYED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=1; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case CONFUSED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=1; curiousMood=0; proudMood=0; relaxedMood=0;
+      break;
+    case CURIOUS:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=1; proudMood=0; relaxedMood=0;
+      break;
+    case PROUD:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=1; relaxedMood=0;
+      break;
+    case RELAXED:
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=1;
       break;
     default:
-      tired=0; 
-      angry=0; 
-      happy=0;
+      tired=0; angry=0; happy=0; alert=0; bored=0; despair=0; disoriented=0; excited=0; focused=0; furious=0; sad=0; scared=0; sleepy=0; surprised=0; worried=0; annoyed=0; confusedMood=0; curiousMood=0; proudMood=0; relaxedMood=0;
       break;
     }
+    setMoodGeometry(mood);
   }
 
 // Set predefined position
@@ -430,6 +578,255 @@ int getScreenConstraint_Y(){
  return screenHeight-eyeLheightDefault; // using default height here, because height will vary when blinking and in curious mode
 }
 
+// Helper: fluid step toward a target, always moving at least 1 px/frame so interpolation never stalls
+int moodStep(int current, int target, float smoothing) {
+  int diff = target - current;
+  if (diff == 0) return current;
+  int step = (int)(diff * smoothing);
+  if (diff > 0 && step < 1) step = 1;
+  if (diff < 0 && step > -1) step = -1;
+  return current + step;
+}
+
+// Helper: apply mood-specific geometry targets smoothly
+void applyMoodGeometry() {
+  // Smooth interpolation toward mood targets (never stalls, keeps frames fluid)
+  eyeLheightNext = moodStep(eyeLheightNext, mood_eyeLheightTarget, geometrySmoothing);
+  eyeRheightNext = moodStep(eyeRheightNext, mood_eyeRheightTarget, geometrySmoothing);
+  eyeLwidthNext = moodStep(eyeLwidthNext, mood_eyeLwidthTarget, geometrySmoothing);
+  eyeRwidthNext = moodStep(eyeRwidthNext, mood_eyeRwidthTarget, geometrySmoothing);
+  eyeLborderRadiusNext = moodStep(eyeLborderRadiusNext, mood_eyeLborderRadiusTarget, geometrySmoothing);
+  eyeRborderRadiusNext = moodStep(eyeRborderRadiusNext, mood_eyeRborderRadiusTarget, geometrySmoothing);
+  spaceBetweenNext = moodStep(spaceBetweenNext, mood_spaceBetweenTarget, geometrySmoothing);
+
+  // Vertical offset: only applied while the active mood requests it,
+  // otherwise the user/idle position stays in control of eyeLyNext/eyeRyNext.
+  if (mood_usesHeightOffset){
+    eyeLyNext = eyeLyDefault + mood_eyeLyOffset;
+    eyeRyNext = eyeRyDefault + mood_eyeRyOffset;
+  }
+
+  // Apply macro animations only when the active mood explicitly requests them.
+  // One-shot animations (laugh, confused) and manual setters keep control otherwise.
+  if (mood_autoblinker){
+    autoblinker = true;
+    blinkInterval = mood_blinkInterval;
+    blinkIntervalVariation = mood_blinkVariation;
+  }
+  if (mood_hFlicker){
+    hFlicker = true;
+    hFlickerAmplitude = mood_hFlickerAmplitude;
+  }
+  if (mood_vFlicker){
+    vFlicker = true;
+    vFlickerAmplitude = mood_vFlickerAmplitude;
+  }
+  if (mood_sweat){
+    sweat = true;
+  }
+}
+
+// Helper: set mood geometry targets
+void setMoodGeometry(unsigned char mood) {
+  previousMood = currentMood;
+  bool previousUsedOffset = mood_usesHeightOffset;
+  currentMood = mood;
+  moodChangeTime = millis();
+  moodInitialized = true;
+
+  // When a mood that forced an animation ends, release that animation
+  if (previousMood == EXCITED || previousMood == SLEEPY || previousMood == BORED || previousMood == SAD || previousMood == DESPAIR || previousMood == RELAXED){ autoblinker = false; }
+  if (previousMood == DISORIENTED || previousMood == FURIOUS){ hFlicker = false; }
+  if (previousMood == SCARED){ vFlicker = false; }
+  if (previousMood == DESPAIR){ sweat = false; }
+
+  // Reset all mood targets to defaults first
+  mood_eyeLheightTarget = eyeLheightDefault;
+  mood_eyeRheightTarget = eyeRheightDefault;
+  mood_eyeLwidthTarget = eyeLwidthDefault;
+  mood_eyeRwidthTarget = eyeRwidthDefault;
+  mood_eyeLborderRadiusTarget = eyeLborderRadiusDefault;
+  mood_eyeRborderRadiusTarget = eyeRborderRadiusDefault;
+  mood_eyeLyOffset = 0;
+  mood_eyeRyOffset = 0;
+  mood_usesHeightOffset = false;
+  mood_spaceBetweenTarget = spaceBetweenDefault;
+  mood_autoblinker = false;
+  mood_blinkInterval = 1;
+  mood_blinkVariation = 4;
+  mood_hFlicker = false;
+  mood_hFlickerAmplitude = 0;
+  mood_vFlicker = false;
+  mood_vFlickerAmplitude = 0;
+  mood_sweat = false;
+
+  // Restore centered position when leaving a mood that owned the vertical offset
+  // and the incoming mood does not take over the vertical position itself
+  if (previousUsedOffset && !mood_usesHeightOffset){
+    eyeLyNext = eyeLyDefault;
+    eyeRyNext = eyeRyDefault;
+  }
+
+  switch (mood) {
+    case ALERT:
+      mood_eyeLheightTarget = eyeLheightDefault + 6;
+      mood_eyeRheightTarget = eyeRheightDefault + 6;
+      mood_eyeLborderRadiusTarget = 4;
+      mood_eyeRborderRadiusTarget = 4;
+      mood_eyeLyOffset = -3;
+      mood_eyeRyOffset = -3;
+      mood_usesHeightOffset = true;
+      break;
+    case BORED:
+      mood_eyeLheightTarget = eyeLheightDefault / 2;
+      mood_eyeRheightTarget = eyeRheightDefault / 2;
+      mood_eyeLyOffset = 2;
+      mood_eyeRyOffset = 2;
+      mood_usesHeightOffset = true;
+      mood_autoblinker = true;
+      mood_blinkInterval = 4;
+      mood_blinkVariation = 2;
+      break;
+    case DESPAIR:
+      mood_eyeLheightTarget = eyeLheightDefault - 6;
+      mood_eyeRheightTarget = eyeRheightDefault - 6;
+      mood_eyeLyOffset = 6;
+      mood_eyeRyOffset = 6;
+      mood_usesHeightOffset = true;
+      mood_sweat = true;
+      mood_autoblinker = true;
+      mood_blinkInterval = 5;
+      mood_blinkVariation = 3;
+      break;
+    case DISORIENTED:
+      mood_eyeLwidthTarget = eyeLwidthDefault - 4;
+      mood_eyeRwidthTarget = eyeRwidthDefault + 4;
+      mood_hFlicker = true;
+      mood_hFlickerAmplitude = 6;
+      break;
+    case EXCITED:
+      mood_eyeLheightTarget = eyeLheightDefault + 10;
+      mood_eyeRheightTarget = eyeRheightDefault + 10;
+      mood_eyeLborderRadiusTarget = eyeLheightDefault/2;
+      mood_eyeRborderRadiusTarget = eyeRheightDefault/2;
+      mood_eyeLyOffset = -4;
+      mood_eyeRyOffset = -4;
+      mood_usesHeightOffset = true;
+      mood_autoblinker = true;
+      mood_blinkInterval = 1;
+      mood_blinkVariation = 2;
+      break;
+    case FOCUSED:
+      mood_eyeLheightTarget = eyeLheightDefault / 3;
+      mood_eyeRheightTarget = eyeRheightDefault / 3;
+      mood_eyeLwidthTarget = eyeLwidthDefault + 6;
+      mood_eyeRwidthTarget = eyeRwidthDefault + 6;
+      mood_eyeLborderRadiusTarget = 2;
+      mood_eyeRborderRadiusTarget = 2;
+      mood_eyeLyOffset = 1;
+      mood_eyeRyOffset = 1;
+      mood_usesHeightOffset = true;
+      break;
+    case FURIOUS:
+      mood_eyeLborderRadiusTarget = 2;
+      mood_eyeRborderRadiusTarget = 2;
+      mood_hFlicker = true;
+      mood_hFlickerAmplitude = 4;
+      break;
+    case SAD:
+      mood_eyeLheightTarget = eyeLheightDefault - 4;
+      mood_eyeRheightTarget = eyeRheightDefault - 4;
+      mood_eyeLyOffset = 5;
+      mood_eyeRyOffset = 5;
+      mood_usesHeightOffset = true;
+      mood_autoblinker = true;
+      mood_blinkInterval = 3;
+      mood_blinkVariation = 2;
+      break;
+    case SCARED:
+      mood_eyeLheightTarget = eyeLheightDefault + 12;
+      mood_eyeRheightTarget = eyeRheightDefault + 12;
+      mood_eyeLborderRadiusTarget = eyeLheightDefault/2;
+      mood_eyeRborderRadiusTarget = eyeRheightDefault/2;
+      mood_eyeLyOffset = -8;
+      mood_eyeRyOffset = -8;
+      mood_usesHeightOffset = true;
+      mood_vFlicker = true;
+      mood_vFlickerAmplitude = 3;
+      break;
+    case SLEEPY:
+      mood_eyeLheightTarget = eyeLheightDefault / 4;
+      mood_eyeRheightTarget = eyeRheightDefault / 4;
+      mood_eyeLyOffset = 4;
+      mood_eyeRyOffset = 4;
+      mood_usesHeightOffset = true;
+      mood_autoblinker = true;
+      mood_blinkInterval = 5;
+      mood_blinkVariation = 3;
+      break;
+    case SURPRISED:
+      mood_eyeLheightTarget = eyeLheightDefault + 14;
+      mood_eyeRheightTarget = eyeRheightDefault + 14;
+      mood_eyeLborderRadiusTarget = eyeLheightDefault/2;
+      mood_eyeRborderRadiusTarget = eyeRheightDefault/2;
+      mood_eyeLyOffset = -10;
+      mood_eyeRyOffset = -10;
+      mood_usesHeightOffset = true;
+      break;
+    case WORRIED:
+      mood_eyeLheightTarget = eyeLheightDefault - 2;
+      mood_eyeRheightTarget = eyeRheightDefault - 2;
+      mood_eyeLborderRadiusTarget = 4;
+      mood_eyeRborderRadiusTarget = 4;
+      mood_eyeLyOffset = 2;
+      mood_eyeRyOffset = 2;
+      mood_usesHeightOffset = true;
+      break;
+    case ANNOYED:
+      mood_eyeLheightTarget = eyeLheightDefault / 2;
+      mood_eyeRheightTarget = eyeRheightDefault / 2;
+      mood_eyeLyOffset = 3;
+      mood_eyeRyOffset = -1;
+      mood_usesHeightOffset = true;
+      mood_spaceBetweenTarget = spaceBetweenDefault + 2;
+      break;
+    case CONFUSED:
+      // Uneven, questioning look: asymmetric eye sizes and tilted vertical offsets
+      mood_eyeRheightTarget = eyeRheightDefault - 4;
+      mood_eyeRwidthTarget = eyeRwidthDefault + 2;
+      mood_eyeLyOffset = -1;
+      mood_eyeRyOffset = 2;
+      mood_usesHeightOffset = true;
+      break;
+    case CURIOUS:
+      // Slight eye tilt (left eye raised) + attentive gaze, inner brows are drawn as raised eyelids
+      mood_eyeLheightTarget = eyeLheightDefault + 2;
+      mood_eyeLyOffset = -3;
+      mood_eyeRyOffset = 1;
+      mood_usesHeightOffset = true;
+      break;
+    case PROUD:
+      // Raised chin posture (eyes positioned higher) + slightly narrowed eyes
+      mood_eyeLheightTarget = eyeLheightDefault - 4;
+      mood_eyeRheightTarget = eyeRheightDefault - 4;
+      mood_eyeLyOffset = -5;
+      mood_eyeRyOffset = -5;
+      mood_usesHeightOffset = true;
+      break;
+    case RELAXED:
+      // Soft, gentle: full eye size, relaxed top lids drawn in drawEyes(), slow relaxed blinking
+      mood_eyeLyOffset = 1;
+      mood_eyeRyOffset = 1;
+      mood_usesHeightOffset = true;
+      mood_autoblinker = true;
+      mood_blinkInterval = 6;
+      mood_blinkVariation = 3;
+      break;
+    default:
+      break;
+  }
+}
+
 
 //*********************************************************************************************
 //  BASIC ANIMATION METHODS
@@ -485,6 +882,20 @@ void blink(bool left, bool right) {
   open(left, right);
 }
 
+// WINK - BLINK WITH ONLY ONE EYE
+// Trigger wink animation with one eye, keeping it fluid:
+// the height transition is tweened frame by frame inside drawEyes(),
+// so the eye closes and opens again smoothly without blocking
+void wink(bool left) {
+  if(left){
+    close(true, false); // close left eye only (eyeLheightNext = 1, smoothly tweened)
+    open(true, false); // flag left eye to reopen smoothly once fully closed
+  } else {
+    close(false, true); // close right eye only (eyeRheightNext = 1, smoothly tweened)
+    open(false, true); // flag right eye to reopen smoothly once fully closed
+  }
+}
+
 
 //*********************************************************************************************
 //  MACRO ANIMATION METHODS
@@ -508,6 +919,9 @@ void drawEyes(){
 
   //// PRE-CALCULATIONS - EYE SIZES AND VALUES FOR ANIMATION TWEENINGS ////
 
+  // Smoothly drive eye geometry toward the current mood targets
+  applyMoodGeometry();
+
   // Vertical size offset for larger eyes when looking left or right (curious gaze)
   if(curious){
     if(eyeLxNext<=10){eyeLheightOffset=8;}
@@ -530,12 +944,18 @@ void drawEyes(){
   eyeRy-= eyeRheightOffset/2;
 
 
-  // Open eyes again after closing them
+  // Open eyes again after closing them (reopen to the active mood's eye height for fluid recovery)
 	if(eyeL_open){
-  	if(eyeLheightCurrent <= 1 + eyeLheightOffset){eyeLheightNext = eyeLheightDefault;} 
+  	if(eyeLheightCurrent <= 1 + eyeLheightOffset){
+      if(currentMood != DEFAULT){eyeLheightNext = mood_eyeLheightTarget;}
+      else{eyeLheightNext = eyeLheightDefault;}
+    }
   }
   if(eyeR_open){
-  	if(eyeRheightCurrent <= 1 + eyeRheightOffset){eyeRheightNext = eyeRheightDefault;} 
+  	if(eyeRheightCurrent <= 1 + eyeRheightOffset){
+      if(currentMood != DEFAULT){eyeRheightNext = mood_eyeRheightTarget;}
+      else{eyeRheightNext = eyeRheightDefault;}
+    }
   }
 
   // Left eye width
@@ -647,12 +1067,32 @@ void drawEyes(){
     display->fillRoundRect(eyeRx, eyeRy, eyeRwidthCurrent, eyeRheightCurrent, eyeRborderRadiusCurrent, MAINCOLOR); // right eye
   }
 
-  // Prepare mood type transitions
-  if (tired){eyelidsTiredHeightNext = eyeLheightCurrent/2; eyelidsAngryHeightNext = 0;} else{eyelidsTiredHeightNext = 0;}
-  if (angry){eyelidsAngryHeightNext = eyeLheightCurrent/2; eyelidsTiredHeightNext = 0;} else{eyelidsAngryHeightNext = 0;}
-  if (happy){eyelidsHappyBottomOffsetNext = eyeLheightCurrent/2;} else{eyelidsHappyBottomOffsetNext = 0;}
+  // Prepare mood type transitions - EYELID TARGETS
+  // (eye geometry targets are driven smoothly by applyMoodGeometry())
+  eyelidsTiredHeightNext        = tired        ? eyeLheightCurrent/2 : 0;
+  eyelidsAngryHeightNext        = angry        ? eyeLheightCurrent/2 : 0;
+  eyelidsFuriousHeightNext      = furious      ? eyeLheightCurrent/2 + 4 : 0;
+  eyelidsHappyBottomOffsetNext  = happy        ? eyeLheightCurrent/2 : 0;
+  eyelidsAlertHeightNext        = alert        ? eyeLheightCurrent/3 : 0;
+  eyelidsBoredHeightNext        = bored        ? eyeLheightCurrent/2 : 0;
+  eyelidsDespairHeightNext      = despair      ? eyeLheightCurrent/2 : 0;
+  eyelidsDisorientedHeightLNext = disoriented  ? eyeLheightCurrent/3 : 0;
+  eyelidsDisorientedHeightRNext = disoriented  ? eyeLheightCurrent/2 : 0;
+  eyelidsExcitedHeightNext      = excited      ? eyeLheightCurrent/4 : 0;
+  eyelidsFocusedHeightNext      = focused      ? eyeLheightCurrent/3 : 0;
+  eyelidsSadHeightNext          = sad          ? eyeLheightCurrent/2 : 0;
+  eyelidsScaredHeightNext       = scared       ? eyeLheightCurrent/4 : 0;
+  eyelidsSleepyHeightNext       = sleepy       ? eyeLheightCurrent*3/4 : 0;
+  eyelidsSurprisedHeightNext    = surprised    ? eyeLheightCurrent/4 : 0;
+  eyelidsWorriedHeightNext      = worried      ? eyeLheightCurrent/2 : 0;
+  eyelidsAnnoyedHeightNext      = annoyed      ? eyeLheightCurrent/2 : 0;
+  eyelidsConfusedHeightLNext    = confusedMood ? eyeLheightCurrent/3 : 0;
+  eyelidsConfusedHeightRNext    = confusedMood ? eyeLheightCurrent/5 : 0;
+  eyelidsCuriousHeightNext      = curiousMood  ? eyeLheightCurrent/3 : 0;
+  eyelidsProudBottomOffsetNext  = proudMood    ? eyeLheightCurrent/3 : 0;
+  eyelidsRelaxedHeightNext      = relaxedMood  ? eyeLheightCurrent/3 : 0;
 
-  // Draw tired top eyelids 
+  // Draw tired top eyelids
     eyelidsTiredHeight = (eyelidsTiredHeight + eyelidsTiredHeightNext)/2;
     if (!cyclops){
       display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx, eyeLy+eyelidsTiredHeight-1, BGCOLOR); // left eye 
@@ -681,38 +1121,208 @@ void drawEyes(){
       display->fillRoundRect(eyeRx-1, (eyeRy+eyeRheightCurrent)-eyelidsHappyBottomOffset+1, eyeRwidthCurrent+2, eyeRheightDefault, eyeRborderRadiusCurrent, BGCOLOR); // right eye
     }
 
+  // Draw ALERT eyelids (raised top)
+    eyelidsAlertHeight = (eyelidsAlertHeight + eyelidsAlertHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsAlertHeight-1, BGCOLOR); // left eye
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy-eyelidsAlertHeight-1, BGCOLOR); // right eye
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsAlertHeight-1, BGCOLOR);
+    }
+
+  // Draw BORED eyelids (droopy outer corners - asymmetric)
+    eyelidsBoredHeight = (eyelidsBoredHeight + eyelidsBoredHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsBoredHeight-1, BGCOLOR); // left eye outer droop
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx, eyeRy+eyelidsBoredHeight-1, BGCOLOR); // right eye outer droop
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsBoredHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsBoredHeight-1, BGCOLOR);
+    }
+
+  // Draw DESPAIR eyelids (extreme sad + inner droop)
+    eyelidsDespairHeight = (eyelidsDespairHeight + eyelidsDespairHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx, eyeLy+eyelidsDespairHeight-1, BGCOLOR); // left inner droop
+      display->fillTriangle(eyeRx+eyeRwidthCurrent/2, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy+eyelidsDespairHeight-1, BGCOLOR); // right inner droop
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/4, eyeLy-1, eyeLx, eyeLy+eyelidsDespairHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+3*eyeLwidthCurrent/4, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsDespairHeight-1, BGCOLOR);
+    }
+
+  // Draw DISORIENTED eyelids (asymmetric heights)
+    eyelidsDisorientedHeightL = (eyelidsDisorientedHeightL + eyelidsDisorientedHeightLNext)/2;
+    eyelidsDisorientedHeightR = (eyelidsDisorientedHeightR + eyelidsDisorientedHeightRNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx, eyeLy+eyelidsDisorientedHeightL-1, BGCOLOR); // left
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy+eyelidsDisorientedHeightR-1, BGCOLOR); // right
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx, eyeLy+eyelidsDisorientedHeightL-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsDisorientedHeightR-1, BGCOLOR);
+    }
+
+  // Draw EXCITED eyelids (slight upper lid raise for wide-eye look)
+    eyelidsExcitedHeight = (eyelidsExcitedHeight + eyelidsExcitedHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsExcitedHeight-1, BGCOLOR);
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy-eyelidsExcitedHeight-1, BGCOLOR);
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsExcitedHeight-1, BGCOLOR);
+    }
+
+  // Draw FOCUSED eyelids (narrowed, slight upper lid)
+    eyelidsFocusedHeight = (eyelidsFocusedHeight + eyelidsFocusedHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsFocusedHeight-1, BGCOLOR);
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy+eyelidsFocusedHeight-1, BGCOLOR);
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent/4, eyeLy+eyelidsFocusedHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+3*eyeLwidthCurrent/4, eyeLy+eyelidsFocusedHeight-1, BGCOLOR);
+    }
+
+  // Draw FURIOUS eyelids (extreme angry - deep cuts)
+    eyelidsFuriousHeight = (eyelidsFuriousHeight + eyelidsFuriousHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsFuriousHeight-1, BGCOLOR);
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx, eyeRy+eyelidsFuriousHeight-1, BGCOLOR);
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsFuriousHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsFuriousHeight-1, BGCOLOR);
+    }
+
+  // Draw SAD eyelids (droopy outer corners - inverted happy)
+    eyelidsSadHeight = (eyelidsSadHeight + eyelidsSadHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsSadHeight-1, BGCOLOR);
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx, eyeRy+eyelidsSadHeight-1, BGCOLOR);
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsSadHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsSadHeight-1, BGCOLOR);
+    }
+
+  // Draw SCARED eyelids (raised "brows" - upper triangles)
+    eyelidsScaredHeight = (eyelidsScaredHeight + eyelidsScaredHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsScaredHeight-1, BGCOLOR);
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy-eyelidsScaredHeight-1, BGCOLOR);
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsScaredHeight-1, BGCOLOR);
+    }
+
+  // Draw SLEEPY eyelids (heavy top lids)
+    eyelidsSleepyHeight = (eyelidsSleepyHeight + eyelidsSleepyHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx, eyeLy+eyelidsSleepyHeight-1, BGCOLOR);
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy+eyelidsSleepyHeight-1, BGCOLOR);
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx, eyeLy+eyelidsSleepyHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsSleepyHeight-1, BGCOLOR);
+    }
+
+  // Draw SURPRISED eyelids (raised brows, minimal upper lid)
+    eyelidsSurprisedHeight = (eyelidsSurprisedHeight + eyelidsSurprisedHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsSurprisedHeight-1, BGCOLOR);
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy-eyelidsSurprisedHeight-1, BGCOLOR);
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsSurprisedHeight-1, BGCOLOR);
+    }
+
+  // Draw WORRIED eyelids (furrowed inner corners)
+    eyelidsWorriedHeight = (eyelidsWorriedHeight + eyelidsWorriedHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy+eyelidsWorriedHeight-1, BGCOLOR); // left inner
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy+eyelidsWorriedHeight-1, BGCOLOR); // right inner
+    } else {
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/4, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent/4, eyeLy+eyelidsWorriedHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+3*eyeLwidthCurrent/4, eyeLy-1, eyeLx+3*eyeLwidthCurrent/4, eyeLy+eyelidsWorriedHeight-1, BGCOLOR);
+    }
+
+  // Draw ANNOYED eyelids (half-closed asymmetric)
+    eyelidsAnnoyedHeight = (eyelidsAnnoyedHeight + eyelidsAnnoyedHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx, eyeLy+eyelidsAnnoyedHeight-1, BGCOLOR); // left heavy
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy+eyelidsAnnoyedHeight/2-1, BGCOLOR); // right lighter
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx, eyeLy+eyelidsAnnoyedHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsAnnoyedHeight/2-1, BGCOLOR);
+    }
+
+  // Draw CONFUSED eyelids (asymmetric eyelid positions)
+    eyelidsConfusedHeightL = (eyelidsConfusedHeightL + eyelidsConfusedHeightLNext)/2;
+    eyelidsConfusedHeightR = (eyelidsConfusedHeightR + eyelidsConfusedHeightRNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx, eyeLy+eyelidsConfusedHeightL-1, BGCOLOR); // left heavier
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy+eyelidsConfusedHeightR-1, BGCOLOR); // right lighter
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx, eyeLy+eyelidsConfusedHeightL-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsConfusedHeightR-1, BGCOLOR);
+    }
+
+  // Draw CURIOUS eyelids (raised inner brows)
+    eyelidsCuriousHeight = (eyelidsCuriousHeight + eyelidsCuriousHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-eyelidsCuriousHeight-1, BGCOLOR); // left inner brow raised
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent/2, eyeRy-1, eyeRx, eyeRy-eyelidsCuriousHeight-1, BGCOLOR); // right inner brow raised
+    } else {
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/4, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsCuriousHeight-1, BGCOLOR);
+      display->fillTriangle(eyeLx+eyeLwidthCurrent/2, eyeLy-1, eyeLx+3*eyeLwidthCurrent/4, eyeLy-1, eyeLx+eyeLwidthCurrent/2, eyeLy-eyelidsCuriousHeight-1, BGCOLOR);
+    }
+
+  // Draw PROUD bottom eyelids (narrowed lower lids)
+    eyelidsProudBottomOffset = (eyelidsProudBottomOffset + eyelidsProudBottomOffsetNext)/2;
+    display->fillRoundRect(eyeLx-1, (eyeLy+eyeLheightCurrent)-eyelidsProudBottomOffset+1, eyeLwidthCurrent+2, eyeLheightDefault, eyeLborderRadiusCurrent, BGCOLOR); // left eye
+    if (!cyclops){
+      display->fillRoundRect(eyeRx-1, (eyeRy+eyeRheightCurrent)-eyelidsProudBottomOffset+1, eyeRwidthCurrent+2, eyeRheightDefault, eyeRborderRadiusCurrent, BGCOLOR); // right eye
+    }
+
+  // Draw RELAXED eyelids (soft relaxed top lids)
+    eyelidsRelaxedHeight = (eyelidsRelaxedHeight + eyelidsRelaxedHeightNext)/2;
+    if (!cyclops){
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx, eyeLy+eyelidsRelaxedHeight-1, BGCOLOR); // left eye
+      display->fillTriangle(eyeRx, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy-1, eyeRx+eyeRwidthCurrent, eyeRy+eyelidsRelaxedHeight-1, BGCOLOR); // right eye
+    } else {
+      display->fillTriangle(eyeLx, eyeLy-1, eyeLx+(eyeLwidthCurrent/2), eyeLy-1, eyeLx, eyeLy+eyelidsRelaxedHeight-1, BGCOLOR); // left eyelid half
+      display->fillTriangle(eyeLx+(eyeLwidthCurrent/2), eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy-1, eyeLx+eyeLwidthCurrent, eyeLy+eyelidsRelaxedHeight-1, BGCOLOR); // right eyelid half
+    }
+
   // Add sweat drops
     if (sweat){
-      // Sweat drop 1 -> left corner
-      if(sweat1YPos <= sweat1YPosMax){sweat1YPos+=0.5;} // vertical movement from initial to max
-      else {sweat1XPosInitial = random(30); sweat1YPos = 2; sweat1YPosMax = (random(10)+10); sweat1Width = 1; sweat1Height = 2;} // if max vertical position is reached: reset all values for next drop
-      if(sweat1YPos <= sweat1YPosMax/2){sweat1Width+=0.5; sweat1Height+=0.5;} // shape grows in first half of animation ...
-      else {sweat1Width-=0.1; sweat1Height-=0.5;} // ... and shrinks in second half of animation
-      sweat1XPos = sweat1XPosInitial-(sweat1Width/2); // keep the growing shape centered to initial x position
-      display->fillRoundRect(sweat1XPos, sweat1YPos, sweat1Width, sweat1Height, sweatBorderradius, MAINCOLOR); // draw sweat drop
-
-
-      // Sweat drop 2 -> center area
-      if(sweat2YPos <= sweat2YPosMax){sweat2YPos+=0.5;} // vertical movement from initial to max
-      else {sweat2XPosInitial = random((screenWidth-60))+30; sweat2YPos = 2; sweat2YPosMax = (random(10)+10); sweat2Width = 1; sweat2Height = 2;} // if max vertical position is reached: reset all values for next drop
-      if(sweat2YPos <= sweat2YPosMax/2){sweat2Width+=0.5; sweat2Height+=0.5;} // shape grows in first half of animation ...
-      else {sweat2Width-=0.1; sweat2Height-=0.5;} // ... and shrinks in second half of animation
-      sweat2XPos = sweat2XPosInitial-(sweat2Width/2); // keep the growing shape centered to initial x position
-      display->fillRoundRect(sweat2XPos, sweat2YPos, sweat2Width, sweat2Height, sweatBorderradius, MAINCOLOR); // draw sweat drop
-
-
-      // Sweat drop 3 -> right corner
-      if(sweat3YPos <= sweat3YPosMax){sweat3YPos+=0.5;} // vertical movement from initial to max
-      else {sweat3XPosInitial = (screenWidth-30)+(random(30)); sweat3YPos = 2; sweat3YPosMax = (random(10)+10); sweat3Width = 1; sweat3Height = 2;} // if max vertical position is reached: reset all values for next drop
-      if(sweat3YPos <= sweat3YPosMax/2){sweat3Width+=0.5; sweat3Height+=0.5;} // shape grows in first half of animation ...
-      else {sweat3Width-=0.1; sweat3Height-=0.5;} // ... and shrinks in second half of animation
-      sweat3XPos = sweat3XPosInitial-(sweat3Width/2); // keep the growing shape centered to initial x position
-      display->fillRoundRect(sweat3XPos, sweat3YPos, sweat3Width, sweat3Height, sweatBorderradius, MAINCOLOR); // draw sweat drop
+      updateSweatDrop(sweat1, 0, 30);
+      updateSweatDrop(sweat2, 30, screenWidth-60);
+      updateSweatDrop(sweat3, screenWidth-30, 30);
     }
 
   display->display(); // show drawings on display
 
 } // end of drawEyes method
+
+
+//*********************************************************************************************
+//  SWEAT DROP ANIMATION
+//*********************************************************************************************
+
+// Fluid one-drop animation: falls, grows, then shrinks before resetting randomly
+void updateSweatDrop(SweatDrop &drop, int xMin, int xRange){
+  if(drop.yPos <= drop.yPosMax){
+    drop.yPos += (float)frameInterval*0.025; // frame-rate independent vertical speed
+    if(drop.yPos <= drop.yPosMax/2){
+      drop.width += (float)frameInterval*0.03;
+      drop.height += (float)frameInterval*0.03;
+    } else {
+      drop.width  -= (float)frameInterval*0.005;
+      drop.height -= (float)frameInterval*0.025;
+    }
+  } else {
+    drop.xPosInitial = xMin + random(xRange);
+    drop.yPos = 2;
+    drop.yPosMax = (random(10)+10);
+    drop.width = 1;
+    drop.height = 2;
+  }
+  int dropX = drop.xPosInitial - (int)(drop.width/2);
+  display->fillRoundRect(dropX, (int)drop.yPos, (int)drop.width, (int)drop.height, sweatBorderradius, MAINCOLOR);
+}
 
 
 }; // end of class roboEyes
