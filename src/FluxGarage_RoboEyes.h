@@ -615,12 +615,13 @@ void drawEyes(){
   }
 
   // Idle - eyes moving to random positions on screen
-  if(idle){
-    if(millis() >= idleAnimationTimer){
-      eyeLxNext = random(getScreenConstraint_X());
-      eyeLyNext = random(getScreenConstraint_Y());
-      idleAnimationTimer = millis()+(idleInterval*1000)+(random(idleIntervalVariation)*1000); // calculate next time for eyes repositioning
-    }
+  if (idle) {
+	  if (millis() - idleAnimationTimer >= idleDelayMs) {
+		  eyeLxNext = random(max(1, getScreenConstraint_X() + 1));
+		  eyeLyNext = random(max(1, getScreenConstraint_Y() + 1));
+		  idleAnimationTimer = millis();
+		  idleDelayMs = (idleInterval * 1000UL) + (random(idleIntervalVariation) * 1000UL);
+	  }
   }
 
   // Adding offsets for horizontal flickering/shivering
