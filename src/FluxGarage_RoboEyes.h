@@ -176,6 +176,7 @@ bool idle = 0;
 int idleInterval = 1; // basic interval between each eye repositioning in full seconds
 int idleIntervalVariation = 3; // interval variaton range in full seconds, random number inside of given range will be add to the basic idleInterval, set to 0 for no variation
 unsigned long idleAnimationTimer = 0; // for organising eyeblink timing
+unsigned long idleDelayMs = 0;
 
 // Animation - eyes confused: eyes shaking left and right
 bool confused = 0;
