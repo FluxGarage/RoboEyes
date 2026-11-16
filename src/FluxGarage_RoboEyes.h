@@ -579,7 +579,8 @@ void drawEyes(){
 	if(autoblinker){
 		if(millis() >= blinktimer){
 		blink();
-		blinktimer = millis()+(blinkInterval*1000)+(random(blinkIntervalVariation)*1000); // calculate next time for blinking
+		blinktimer = millis() + (blinkInterval * 1000UL)
+             + (random(blinkIntervalVariation) * 1000UL); // calculate next time for blinking
 		}
 	}
 
