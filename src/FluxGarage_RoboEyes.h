@@ -64,7 +64,9 @@ private:
 // Display colors
 uint8_t BGCOLOR = 0;   // background and overlays
 uint8_t MAINCOLOR = 1; // drawings
-
+// Optional extension callback
+void (*overlayCallback)(AdafruitDisplay&, int, int, void*) = nullptr;
+void* overlayContext = nullptr;
 public:
 
 // Reference to Adafruit display object
@@ -286,6 +288,14 @@ void setDisplayColors(uint8_t background, uint8_t main) {
   BGCOLOR = background; // background and overlays, choose 0 for monochrome displays and 0x00 for grayscale displays such as SSD1322
   MAINCOLOR = main; // drawings, choose 1 for monochrome displays and 0x0F for grayscale displays such as SSD1322 (0x0F = maximum brightness)
 } 
+// Register an optional display overlay
+void setOverlayCallback(
+    void (*callback)(AdafruitDisplay&, int, int, void*),
+    void* context = nullptr
+) {
+    overlayCallback = callback;
+    overlayContext = context;
+}
 
 void setWidth(byte leftEye, byte rightEye) {
   eyeLwidthNext = eyeLwidthDefault =
@@ -751,6 +761,10 @@ void drawEyes(){
       sweat3XPos = sweat3XPosInitial-(sweat3Width/2); // keep the growing shape centered to initial x position
       display->fillRoundRect(sweat3XPos, sweat3YPos, sweat3Width, sweat3Height, sweatBorderradius, MAINCOLOR); // draw sweat drop
     }
+	// Render optional extensions
+	if (overlayCallback) {
+    overlayCallback(*display, screenWidth, screenHeight, overlayContext);
+	}
 
   display->display(); // show drawings on display
 
