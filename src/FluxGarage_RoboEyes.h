@@ -369,20 +369,20 @@ void setPosition(unsigned char position)
   }
 
 // Set automated eye blinking, minimal blink interval in full seconds and blink interval variation range in full seconds
-void setAutoblinker(bool active, int interval, int variation){
+void setAutoblinker(bool active, int interval, int variation) {
   autoblinker = active;
-  blinkInterval = interval;
-  blinkIntervalVariation = variation;
+  blinkInterval = max(1, interval);
+  blinkIntervalVariation = max(0, variation);
 }
 void setAutoblinker(bool active){
   autoblinker = active;
 }
 
 // Set idle mode - automated eye repositioning, minimal time interval in full seconds and time interval variation range in full seconds
-void setIdleMode(bool active, int interval, int variation){
+void setIdleMode(bool active, int interval, int variation) {
   idle = active;
-  idleInterval = interval;
-  idleIntervalVariation = variation;
+  idleInterval = max(1, interval);
+  idleIntervalVariation = max(0, variation);
 }
 void setIdleMode(bool active) {
   idle = active;
