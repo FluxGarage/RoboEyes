@@ -244,10 +244,13 @@ void update(){
 //*********************************************************************************************
 
 // Calculate frame interval based on defined frameRate
-void setFramerate(byte fps){
-  frameInterval = 1000/fps;
-}
+void setFramerate(byte fps) {
+  if (fps == 0) {
+    fps = 1;  // Division durch null verhindern
+  }
 
+  frameInterval = 1000UL / fps;
+}
 // Set color values
 void setDisplayColors(uint8_t background, uint8_t main) {
   BGCOLOR = background; // background and overlays, choose 0 for monochrome displays and 0x00 for grayscale displays such as SSD1322
