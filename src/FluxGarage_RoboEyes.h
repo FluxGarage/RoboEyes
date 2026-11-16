@@ -233,6 +233,10 @@ void begin(int width, int height, byte frameRate) {
 	
 	screenWidth = width; // OLED display width, in pixels
 	screenHeight = height; // OLED display height, in pixels
+	
+	setWidth((byte)eyeLwidthDefault, (byte)eyeRwidthDefault);
+	setHeight((byte)eyeLheightDefault, (byte)eyeRheightDefault);
+	
 	eyeLxDefault = (screenWidth -(eyeLwidthDefault + spaceBetweenDefault + eyeRwidthDefault)) / 2;
 	eyeLyDefault = (screenHeight - eyeLheightDefault) / 2;
 	eyeRxDefault = eyeLxDefault + eyeLwidthDefault + spaceBetweenDefault;
@@ -281,17 +285,21 @@ void setDisplayColors(uint8_t background, uint8_t main) {
 }
 
 void setWidth(byte leftEye, byte rightEye) {
-	eyeLwidthNext = leftEye;
-	eyeRwidthNext = rightEye;
-  eyeLwidthDefault = leftEye;
-  eyeRwidthDefault = rightEye;
+  eyeLwidthNext = eyeLwidthDefault =
+      constrain((int)leftEye, 1, screenWidth);
+
+  eyeRwidthNext = eyeRwidthDefault =
+      constrain((int)rightEye, 1, screenWidth);
+
+  setSpacebetween(spaceBetweenDefault);
 }
 
 void setHeight(byte leftEye, byte rightEye) {
-	eyeLheightNext = leftEye;
-	eyeRheightNext = rightEye;
-  eyeLheightDefault = leftEye;
-  eyeRheightDefault = rightEye;
+  eyeLheightNext = eyeLheightDefault =
+      constrain((int)leftEye, 1, screenHeight);
+
+  eyeRheightNext = eyeRheightDefault =
+      constrain((int)rightEye, 1, screenHeight);
 }
 
 // Set border radius for left and right eye
@@ -304,8 +312,11 @@ void setBorderradius(byte leftEye, byte rightEye) {
 
 // Set space between the eyes, can also be negative
 void setSpacebetween(int space) {
-  spaceBetweenNext = space;
-  spaceBetweenDefault = space;
+  int minSpace = -min(eyeLwidthDefault, eyeRwidthDefault);
+  int maxSpace = screenWidth - eyeLwidthDefault - eyeRwidthDefault;
+
+  spaceBetweenNext = spaceBetweenDefault =
+      constrain(space, minSpace, maxSpace);
 }
 
 // Set mood expression
