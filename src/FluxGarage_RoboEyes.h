@@ -113,6 +113,11 @@ byte eyeRborderRadiusDefault = 8;
 byte eyeRborderRadiusCurrent = eyeRborderRadiusDefault;
 byte eyeRborderRadiusNext = eyeRborderRadiusDefault;
 
+// Space between eyes
+int spaceBetweenDefault = 10;
+int spaceBetweenCurrent = spaceBetweenDefault;
+int spaceBetweenNext = 10;
+
 // EYE LEFT - Coordinates
 int eyeLxDefault = ((screenWidth)-(eyeLwidthDefault+spaceBetweenDefault+eyeRwidthDefault))/2;
 int eyeLyDefault = ((screenHeight-eyeLheightDefault)/2);
@@ -140,10 +145,7 @@ byte eyelidsAngryHeightNext = eyelidsAngryHeight;
 byte eyelidsHappyBottomOffsetMax = (eyeLheightDefault/2)+3;
 byte eyelidsHappyBottomOffset = 0;
 byte eyelidsHappyBottomOffsetNext = 0;
-// Space between eyes
-int spaceBetweenDefault = 10;
-int spaceBetweenCurrent = spaceBetweenDefault;
-int spaceBetweenNext = 10;
+
 
 
 //*********************************************************************************************
