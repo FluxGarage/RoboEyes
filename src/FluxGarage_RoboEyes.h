@@ -170,6 +170,7 @@ bool autoblinker = 0; // activate auto blink animation
 int blinkInterval = 1; // basic interval between each blink in full seconds
 int blinkIntervalVariation = 4; // interval variaton range in full seconds, random number inside of given range will be add to the basic blinkInterval, set to 0 for no variation
 unsigned long blinktimer = 0; // for organising eyeblink timing
+unsigned long blinkDelayMs = 0;
 
 // Animation - idle mode: eyes looking in random directions
 bool idle = 0;
