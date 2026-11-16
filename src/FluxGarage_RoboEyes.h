@@ -28,9 +28,9 @@
 
 
 // Display colors
-uint8_t BGCOLOR = 0; // background and overlays
-uint8_t MAINCOLOR = 1; // drawings
-
+//uint8_t BGCOLOR = 0; // background and overlays
+//uint8_t MAINCOLOR = 1; // drawings
+// 
 // For mood type switch
 #define DEFAULT 0
 #define TIRED 1
@@ -61,6 +61,9 @@ class RoboEyes
 private:
 
 // Yes, everything is currently still accessible. Be responsible and don't mess things up :)
+// Display colors
+uint8_t BGCOLOR = 0;   // background and overlays
+uint8_t MAINCOLOR = 1; // drawings
 
 public:
 
