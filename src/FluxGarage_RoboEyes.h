@@ -593,7 +593,7 @@ void drawEyes(){
       setVFlicker(1, 5);
       laughAnimationTimer = millis();
       laughToggle = 0;
-    } else if(millis() >= laughAnimationTimer+laughAnimationDuration){
+    } else if(millis() - laughAnimationTimer >= (unsigned long)laughAnimationDuration){
       setVFlicker(0, 0);
       laughToggle = 1;
       laugh=0; 
@@ -606,7 +606,7 @@ void drawEyes(){
       setHFlicker(1, 20);
       confusedAnimationTimer = millis();
       confusedToggle = 0;
-    } else if(millis() >= confusedAnimationTimer+confusedAnimationDuration){
+    } else if(millis() - confusedAnimationTimer >= (unsigned long)confusedAnimationDuration){
       setHFlicker(0, 0);
       confusedToggle = 1;
       confused=0; 
