@@ -233,7 +233,17 @@ void begin(int width, int height, byte frameRate) {
 	
 	screenWidth = width; // OLED display width, in pixels
 	screenHeight = height; // OLED display height, in pixels
-  	
+	eyeLxDefault = (screenWidth -(eyeLwidthDefault + spaceBetweenDefault + eyeRwidthDefault)) / 2;
+	eyeLyDefault = (screenHeight - eyeLheightDefault) / 2;
+	eyeRxDefault = eyeLxDefault + eyeLwidthDefault + spaceBetweenDefault;
+	eyeRyDefault = (screenHeight - eyeRheightDefault) / 2;
+	
+	// Update current and target positions
+	eyeLx = eyeLxNext = eyeLxDefault;
+	eyeLy = eyeLyNext = eyeLyDefault;
+	eyeRx = eyeRxNext = eyeRxDefault;
+	eyeRy = eyeRyNext = eyeRyDefault;
+	
 	display->clearDisplay(); // clear the display buffer
   	display->display(); // show empty screen
   	
