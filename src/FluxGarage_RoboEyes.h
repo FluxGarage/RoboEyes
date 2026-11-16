@@ -223,13 +223,20 @@ RoboEyes(AdafruitDisplay &disp) : display(&disp) {};
 
 // Startup RoboEyes with defined screen-width, screen-height and max. frames per second
 void begin(int width, int height, byte frameRate) {
+	if (width <= 0 || height <= 0) {
+	Serial.println(F("RoboEyes ERROR: Invalid display dimensions!"));
+    return; }// Prevent invalid display dimensions
+	
 	screenWidth = width; // OLED display width, in pixels
 	screenHeight = height; // OLED display height, in pixels
-  display->clearDisplay(); // clear the display buffer
-  display->display(); // show empty screen
-  eyeLheightCurrent = 1; // start with closed eyes
-  eyeRheightCurrent = 1; // start with closed eyes
-  setFramerate(frameRate); // calculate frame interval based on defined frameRate
+  	
+	display->clearDisplay(); // clear the display buffer
+  	display->display(); // show empty screen
+  	
+	eyeLheightCurrent = 1; // start with closed eyes
+  	eyeRheightCurrent = 1; // start with closed eyes
+  	
+	setFramerate(frameRate); // calculate frame interval based on defined frameRate
 }
 
 void update(){
