@@ -197,7 +197,7 @@ byte sweatBorderradius = 3;
 int sweat1XPosInitial = 2;
 int sweat1XPos;
 float sweat1YPos = 2;
-int sweat1YPosMax;
+int sweat1YPosMax= 0;
 float sweat1Height = 2;
 float sweat1Width = 1;
 
@@ -205,7 +205,7 @@ float sweat1Width = 1;
 int sweat2XPosInitial = 2;
 int sweat2XPos;
 float sweat2YPos = 2;
-int sweat2YPosMax;
+int sweat2YPosMax= 0;
 float sweat2Height = 2;
 float sweat2Width = 1;
 
@@ -213,7 +213,7 @@ float sweat2Width = 1;
 int sweat3XPosInitial = 2;
 int sweat3XPos;
 float sweat3YPos = 2;
-int sweat3YPosMax;
+int sweat3YPosMax= 0;
 float sweat3Height = 2;
 float sweat3Width = 1;
 
