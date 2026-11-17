@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> **A new major version of RoboEyes is in development.**
+> The internal architecture has changed significantly, so pull requests are paused for the next few weeks. Bug reports and ideas are still welcome as issues. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+
 # FluxGarage RoboEyes Library
 
 Draws smoothly animated robot eyes on OLED displays, using the Adafruit GFX library. Robot eye shapes are configurable in terms of width, height, border radius and space between. Several different mood expressions (happy, tired, angry, default) and animations (autoblinker, idle, laughing, confused) are available. All state changes have smooth transitions and thus, complex animation sequences are easily feasible.
