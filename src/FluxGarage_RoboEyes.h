@@ -28,9 +28,9 @@
 
 
 // Display colors
-uint8_t BGCOLOR = 0; // background and overlays
-uint8_t MAINCOLOR = 1; // drawings
-
+//uint8_t BGCOLOR = 0; // background and overlays
+//uint8_t MAINCOLOR = 1; // drawings
+// 
 // For mood type switch
 #define DEFAULT 0
 #define TIRED 1
@@ -61,7 +61,12 @@ class RoboEyes
 private:
 
 // Yes, everything is currently still accessible. Be responsible and don't mess things up :)
-
+// Display colors
+uint8_t BGCOLOR = 0;   // background and overlays
+uint8_t MAINCOLOR = 1; // drawings
+// Optional extension callback
+void (*overlayCallback)(AdafruitDisplay&, int, int, void*) = nullptr;
+void* overlayContext = nullptr;
 public:
 
 // Reference to Adafruit display object
@@ -113,6 +118,11 @@ byte eyeRborderRadiusDefault = 8;
 byte eyeRborderRadiusCurrent = eyeRborderRadiusDefault;
 byte eyeRborderRadiusNext = eyeRborderRadiusDefault;
 
+// Space between eyes
+int spaceBetweenDefault = 10;
+int spaceBetweenCurrent = spaceBetweenDefault;
+int spaceBetweenNext = 10;
+
 // EYE LEFT - Coordinates
 int eyeLxDefault = ((screenWidth)-(eyeLwidthDefault+spaceBetweenDefault+eyeRwidthDefault))/2;
 int eyeLyDefault = ((screenHeight-eyeLheightDefault)/2);
@@ -140,10 +150,7 @@ byte eyelidsAngryHeightNext = eyelidsAngryHeight;
 byte eyelidsHappyBottomOffsetMax = (eyeLheightDefault/2)+3;
 byte eyelidsHappyBottomOffset = 0;
 byte eyelidsHappyBottomOffsetNext = 0;
-// Space between eyes
-int spaceBetweenDefault = 10;
-int spaceBetweenCurrent = spaceBetweenDefault;
-int spaceBetweenNext = 10;
+
 
 
 //*********************************************************************************************
@@ -165,12 +172,14 @@ bool autoblinker = 0; // activate auto blink animation
 int blinkInterval = 1; // basic interval between each blink in full seconds
 int blinkIntervalVariation = 4; // interval variaton range in full seconds, random number inside of given range will be add to the basic blinkInterval, set to 0 for no variation
 unsigned long blinktimer = 0; // for organising eyeblink timing
+unsigned long blinkDelayMs = 0; // Delay until next blink in milliseconds
 
 // Animation - idle mode: eyes looking in random directions
 bool idle = 0;
 int idleInterval = 1; // basic interval between each eye repositioning in full seconds
 int idleIntervalVariation = 3; // interval variaton range in full seconds, random number inside of given range will be add to the basic idleInterval, set to 0 for no variation
 unsigned long idleAnimationTimer = 0; // for organising eyeblink timing
+unsigned long idleDelayMs = 0; // Delay until next idle movement in milliseconds
 
 // Animation - eyes confused: eyes shaking left and right
 bool confused = 0;
@@ -192,7 +201,7 @@ byte sweatBorderradius = 3;
 int sweat1XPosInitial = 2;
 int sweat1XPos;
 float sweat1YPos = 2;
-int sweat1YPosMax;
+int sweat1YPosMax= 0;
 float sweat1Height = 2;
 float sweat1Width = 1;
 
@@ -200,7 +209,7 @@ float sweat1Width = 1;
 int sweat2XPosInitial = 2;
 int sweat2XPos;
 float sweat2YPos = 2;
-int sweat2YPosMax;
+int sweat2YPosMax= 0;
 float sweat2Height = 2;
 float sweat2Width = 1;
 
@@ -208,7 +217,7 @@ float sweat2Width = 1;
 int sweat3XPosInitial = 2;
 int sweat3XPos;
 float sweat3YPos = 2;
-int sweat3YPosMax;
+int sweat3YPosMax= 0;
 float sweat3Height = 2;
 float sweat3Width = 1;
 
@@ -221,13 +230,36 @@ RoboEyes(AdafruitDisplay &disp) : display(&disp) {};
 
 // Startup RoboEyes with defined screen-width, screen-height and max. frames per second
 void begin(int width, int height, byte frameRate) {
+	// Prevent invalid display dimensions
+	if (width <= 0 || height <= 0) {
+	Serial.println(F("RoboEyes ERROR: Invalid display dimensions!"));
+    return; }
+	
 	screenWidth = width; // OLED display width, in pixels
 	screenHeight = height; // OLED display height, in pixels
-  display->clearDisplay(); // clear the display buffer
-  display->display(); // show empty screen
-  eyeLheightCurrent = 1; // start with closed eyes
-  eyeRheightCurrent = 1; // start with closed eyes
-  setFramerate(frameRate); // calculate frame interval based on defined frameRate
+	
+	// Adjust eye dimensions and recalculate positions for the configured display size
+	setWidth((byte)eyeLwidthDefault, (byte)eyeRwidthDefault);
+	setHeight((byte)eyeLheightDefault, (byte)eyeRheightDefault);
+	
+	eyeLxDefault = (screenWidth -(eyeLwidthDefault + spaceBetweenDefault + eyeRwidthDefault)) / 2;
+	eyeLyDefault = (screenHeight - eyeLheightDefault) / 2;
+	eyeRxDefault = eyeLxDefault + eyeLwidthDefault + spaceBetweenDefault;
+	eyeRyDefault = (screenHeight - eyeRheightDefault) / 2;
+	
+	// Update current and target positions
+	eyeLx = eyeLxNext = eyeLxDefault;
+	eyeLy = eyeLyNext = eyeLyDefault;
+	eyeRx = eyeRxNext = eyeRxDefault;
+	eyeRy = eyeRyNext = eyeRyDefault;
+	
+	display->clearDisplay(); // clear the display buffer
+  	display->display(); // show empty screen
+  	
+	eyeLheightCurrent = 1; // start with closed eyes
+  	eyeRheightCurrent = 1; // start with closed eyes
+  	
+	setFramerate(frameRate); // calculate frame interval based on defined frameRate
 }
 
 void update(){
@@ -244,28 +276,43 @@ void update(){
 //*********************************************************************************************
 
 // Calculate frame interval based on defined frameRate
-void setFramerate(byte fps){
-  frameInterval = 1000/fps;
-}
+void setFramerate(byte fps) {
+  if (fps == 0) {
+    fps = 1;  // Prevent division by zero
+  }
 
+  frameInterval = 1000UL / fps;
+}
 // Set color values
 void setDisplayColors(uint8_t background, uint8_t main) {
   BGCOLOR = background; // background and overlays, choose 0 for monochrome displays and 0x00 for grayscale displays such as SSD1322
   MAINCOLOR = main; // drawings, choose 1 for monochrome displays and 0x0F for grayscale displays such as SSD1322 (0x0F = maximum brightness)
+} 
+// Register an optional display overlay
+void setOverlayCallback(
+    void (*callback)(AdafruitDisplay&, int, int, void*),
+    void* context = nullptr
+) {
+    overlayCallback = callback;
+    overlayContext = context;
 }
 
 void setWidth(byte leftEye, byte rightEye) {
-	eyeLwidthNext = leftEye;
-	eyeRwidthNext = rightEye;
-  eyeLwidthDefault = leftEye;
-  eyeRwidthDefault = rightEye;
-}
+  eyeLwidthNext = eyeLwidthDefault =
+      constrain((int)leftEye, 1, screenWidth);
+
+  eyeRwidthNext = eyeRwidthDefault =
+      constrain((int)rightEye, 1, screenWidth);
+
+  setSpacebetween(spaceBetweenDefault);
+}// Limit eye widths to valid display dimensions and update spacing
 
 void setHeight(byte leftEye, byte rightEye) {
-	eyeLheightNext = leftEye;
-	eyeRheightNext = rightEye;
-  eyeLheightDefault = leftEye;
-  eyeRheightDefault = rightEye;
+  eyeLheightNext = eyeLheightDefault =
+      constrain((int)leftEye, 1, screenHeight);
+
+  eyeRheightNext = eyeRheightDefault =
+      constrain((int)rightEye, 1, screenHeight);
 }
 
 // Set border radius for left and right eye
@@ -278,9 +325,12 @@ void setBorderradius(byte leftEye, byte rightEye) {
 
 // Set space between the eyes, can also be negative
 void setSpacebetween(int space) {
-  spaceBetweenNext = space;
-  spaceBetweenDefault = space;
-}
+  int minSpace = -min(eyeLwidthDefault, eyeRwidthDefault);
+  int maxSpace = screenWidth - eyeLwidthDefault - eyeRwidthDefault;
+
+  spaceBetweenNext = spaceBetweenDefault =
+      constrain(space, minSpace, maxSpace);
+}// Limit eye spacing based on eye widths while allowing negative values for overlapping eyes
 
 // Set mood expression
 void setMood(unsigned char mood)
@@ -364,20 +414,20 @@ void setPosition(unsigned char position)
   }
 
 // Set automated eye blinking, minimal blink interval in full seconds and blink interval variation range in full seconds
-void setAutoblinker(bool active, int interval, int variation){
+void setAutoblinker(bool active, int interval, int variation) {
   autoblinker = active;
-  blinkInterval = interval;
-  blinkIntervalVariation = variation;
+  blinkInterval = max(1, interval);
+  blinkIntervalVariation = max(0, variation);
 }
 void setAutoblinker(bool active){
   autoblinker = active;
 }
 
 // Set idle mode - automated eye repositioning, minimal time interval in full seconds and time interval variation range in full seconds
-void setIdleMode(bool active, int interval, int variation){
+void setIdleMode(bool active, int interval, int variation) {
   idle = active;
-  idleInterval = interval;
-  idleIntervalVariation = variation;
+  idleInterval = max(1, interval);
+  idleIntervalVariation = max(0, variation);
 }
 void setIdleMode(bool active) {
   idle = active;
@@ -563,11 +613,12 @@ void drawEyes(){
   
 
   //// APPLYING MACRO ANIMATIONS ////
-
-	if(autoblinker){
-		if(millis() >= blinktimer){
-		blink();
-		blinktimer = millis()+(blinkInterval*1000)+(random(blinkIntervalVariation)*1000); // calculate next time for blinking
+	// Use elapsed-time comparisons to handle millis() overflow safely
+	if (autoblinker) {
+		if (millis() - blinktimer >= blinkDelayMs) {
+			blink();
+			blinktimer = millis();
+			blinkDelayMs = (blinkInterval * 1000UL) + (random(blinkIntervalVariation) * 1000UL);
 		}
 	}
 
@@ -577,7 +628,7 @@ void drawEyes(){
       setVFlicker(1, 5);
       laughAnimationTimer = millis();
       laughToggle = 0;
-    } else if(millis() >= laughAnimationTimer+laughAnimationDuration){
+    } else if(millis() - laughAnimationTimer >= (unsigned long)laughAnimationDuration){
       setVFlicker(0, 0);
       laughToggle = 1;
       laugh=0; 
@@ -590,7 +641,7 @@ void drawEyes(){
       setHFlicker(1, 20);
       confusedAnimationTimer = millis();
       confusedToggle = 0;
-    } else if(millis() >= confusedAnimationTimer+confusedAnimationDuration){
+    } else if(millis() - confusedAnimationTimer >= (unsigned long)confusedAnimationDuration){
       setHFlicker(0, 0);
       confusedToggle = 1;
       confused=0; 
@@ -598,12 +649,13 @@ void drawEyes(){
   }
 
   // Idle - eyes moving to random positions on screen
-  if(idle){
-    if(millis() >= idleAnimationTimer){
-      eyeLxNext = random(getScreenConstraint_X());
-      eyeLyNext = random(getScreenConstraint_Y());
-      idleAnimationTimer = millis()+(idleInterval*1000)+(random(idleIntervalVariation)*1000); // calculate next time for eyes repositioning
-    }
+  if (idle) {
+	  if (millis() - idleAnimationTimer >= idleDelayMs) {
+		  eyeLxNext = random(max(1, getScreenConstraint_X() + 1));
+		  eyeLyNext = random(max(1, getScreenConstraint_Y() + 1));
+		  idleAnimationTimer = millis();
+		  idleDelayMs = (idleInterval * 1000UL) + (random(idleIntervalVariation) * 1000UL);
+	  }
   }
 
   // Adding offsets for horizontal flickering/shivering
@@ -709,6 +761,10 @@ void drawEyes(){
       sweat3XPos = sweat3XPosInitial-(sweat3Width/2); // keep the growing shape centered to initial x position
       display->fillRoundRect(sweat3XPos, sweat3YPos, sweat3Width, sweat3Height, sweatBorderradius, MAINCOLOR); // draw sweat drop
     }
+	// Render optional extensions
+	if (overlayCallback) {
+    overlayCallback(*display, screenWidth, screenHeight, overlayContext);
+	}
 
   display->display(); // show drawings on display
 
